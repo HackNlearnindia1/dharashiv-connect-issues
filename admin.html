@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Tracking Dashboard – Dharashiv Connect</title>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --primary: #0f172a;
+      --accent: #1d4ed8;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --success: #15803d;
+      --warn: #b45309;
+      --danger: #b91c1c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 16px; line-height: 1.5; }
+    .container { max-width: 1020px; margin: 0 auto; }
+    header {
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      color: #fff;
+      padding: 20px;
+      border-radius: 14px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    header h1 { font-size: 1.3rem; }
+    header p { font-size: 0.88rem; opacity: 0.85; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+    }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .field { margin-bottom: 12px; }
+    label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .hint { font-size: 0.8rem; color: var(--muted); }
+    input[type="text"], input[type="email"], input[type="password"], select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: #fff;
+    }
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .btn:hover { opacity: 0.92; }
+    .btn-secondary { background: #e2e8f0; color: var(--text); }
+    .btn-danger { background: #fee2e2; color: var(--danger); }
+    .btn-sm { padding: 7px 12px; font-size: 0.82rem; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .stat { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+    .stat .num { font-size: 1.45rem; font-weight: 700; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
+    .issue-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+    .issue-top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    .badge { padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
+    .b-open { background: #fee2e2; color: var(--danger); }
+    .b-prog { background: #fef3c7; color: var(--warn); }
+    .b-res { background: #dcfce7; color: var(--success); }
+    .attach-preview { margin-top: 8px; padding: 8px; background: #f8fafc; border-radius: 8px; }
+    .attach-preview img { max-width: 240px; max-height: 180px; border-radius: 8px; border: 1px solid var(--border); display: block; margin-top: 6px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Dharashiv Connect – Admin Tracking Dashboard</h1>
+        <p>समस्या, स्क्रीनशॉट/डॉक्यूमेंट आणि रेझोल्यूशन ट्रॅकिंग पॅनेल</p>
+      </div>
+      <div id="headerActions" class="hidden" style="display:none; gap:8px;">
+        <button class="btn btn-sm btn-secondary" onclick="exportCSV()">Export CSV</button>
+        <button class="btn btn-sm btn-danger" onclick="logoutAdmin()">Logout</button>
+      </div>
+    </header>
+
+    <!-- LOGIN SECTION -->
+    <section id="loginBox" class="card" style="max-width: 480px; margin: 24px auto;">
+      <h2 style="margin-bottom: 8px; font-size: 1.15rem;">Admin Login</h2>
+      <p class="hint" style="margin-bottom: 14px;">ट्रॅकिंग डॅशबोर्ड उघडण्यासाठी लॉगिन करा.</p>
+      <form id="adminLoginForm">
+        <div class="field">
+          <label for="adminEmail">Admin Email</label>
+          <input type="email" id="adminEmail" required placeholder="dhelerajendra733@gmail.com" />
+        </div>
+        <div class="field">
+          <label for="adminPass">Password</label>
+          <input type="password" id="adminPass" required placeholder="तुमचा पासवर्ड टाका" />
+        </div>
+        <button type="submit" class="btn" style="width:100%;">Login to Tracking Dashboard</button>
+        <div id="loginError" style="color: var(--danger); margin-top: 10px; font-size: 0.9rem;"></div>
+      </form>
+    </section>
+
+    <!-- DASHBOARD SECTION -->
+    <section id="dashboardPanel" class="card hidden">
+      <div class="stats" id="statsRow"></div>
+
+      <div class="toolbar">
+        <div class="filters">
+          <input type="text" id="searchBox" oninput="renderIssues()" placeholder="Ticket ID, नाव, मोबाइल किंवा समस्या शोधा..." style="max-width: 300px;" />
+          <select id="filterStatus" onchange="renderIssues()" style="max-width: 170px;">
+            <option value="ALL">सर्व Status</option>
+            <option value="Open">Open</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+          </select>
+          <select id="filterPriority" onchange="renderIssues()" style="max-width: 170px;">
+            <option value="ALL">सर्व Priority</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+        <a href="./" class="hint" style="text-decoration:none; font-weight:600; color:var(--accent);">↗ User Form पहा</a>
+      </div>
+
+      <div id="issuesList"></div>
+    </section>
+  </div>
+
+  <script>
+    const ADMIN_EMAIL = "dhelerajendra733@gmail.com";
+    const ADMIN_PASS = "Raj@898989";
+    const STORAGE_KEY = "dc_issues_v1";
+
+    function getIssues() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function saveIssues(list) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+
+    window.addEventListener("DOMContentLoaded", function () {
+      if (sessionStorage.getItem("dc_admin_auth") === "1") {
+        showDashboard();
+      }
+    });
+
+    document.getElementById("adminLoginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const email = document.getElementById("adminEmail").value.trim().toLowerCase();
+      const pass = document.getElementById("adminPass").value;
+      const err = document.getElementById("loginError");
+
+      if (email === ADMIN_EMAIL.toLowerCase() && pass === ADMIN_PASS) {
+        sessionStorage.setItem("dc_admin_auth", "1");
+        err.textContent = "";
+        showDashboard();
+      } else {
+        err.textContent = "चुकीचा Admin Email किंवा Password!";
+      }
+    });
+
+    function showDashboard() {
+      document.getElementById("loginBox").classList.add("hidden");
+      document.getElementById("dashboardPanel").classList.remove("hidden");
+      const actions = document.getElementById("headerActions");
+      actions.classList.remove("hidden");
+      actions.style.display = "flex";
+      renderIssues();
+    }
+
+    function logoutAdmin() {
+      sessionStorage.removeItem("dc_admin_auth");
+      document.getElementById("dashboardPanel").classList.add("hidden");
+      const actions = document.getElementById("headerActions");
+      actions.classList.add("hidden");
+      actions.style.display = "none";
+      document.getElementById("loginBox").classList.remove("hidden");
+    }
+
+    function renderIssues() {
+      const issues = getIssues();
+      const statusFilter = document.getElementById("filterStatus").value;
+      const prioFilter = document.getElementById("filterPriority").value;
+      const q = document.getElementById("searchBox").value.trim().toLowerCase();
+
+      const openCount = issues.filter(i => i.status === "Open").length;
+      const progCount = issues.filter(i => i.status === "In Progress").length;
+      const resCount = issues.filter(i => i.status === "Resolved").length;
+
+      document.getElementById("statsRow").innerHTML = `
+        <div class="stat"><div class="hint">एकूण Issues</div><div class="num">${issues.length}</div></div>
+        <div class="stat"><div class="hint">Open</div><div class="num" style="color:var(--danger)">${openCount}</div></div>
+        <div class="stat"><div class="hint">In Progress</div><div class="num" style="color:var(--warn)">${progCount}</div></div>
+        <div class="stat"><div class="hint">Resolved</div><div class="num" style="color:var(--success)">${resCount}</div></div>
+      `;
+
+      const filtered = issues.filter(item => {
+        const matchStatus = statusFilter === "ALL" || item.status === statusFilter;
+        const matchPrio = prioFilter === "ALL" || item.severity === prioFilter;
+        const text = `${item.id} ${item.name} ${item.phone} ${item.description} ${item.screen} ${item.categories.join(" ")}`.toLowerCase();
+        const matchQuery = !q || text.includes(q);
+        return matchStatus && matchPrio && matchQuery;
+      });
+
+      const listEl = document.getElementById("issuesList");
+      if (filtered.length === 0) {
+        listEl.innerHTML = `<p class="hint" style="padding:12px 0;">कोणतीही नोंद आढळली नाही.</p>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(item => {
+        const badgeClass = item.status === "Resolved" ? "b-res" : item.status === "In Progress" ? "b-prog" : "b-open";
+        const attHtml = item.attachment
+          ? `<div class="attach-preview">
+               <strong>Attachment:</strong> ${escapeHtml(item.attachment.name)} (${item.attachment.sizeKB} KB) —
+               <a href="${item.attachment.dataUrl}" download="${escapeHtml(item.attachment.name)}">Download File</a>
+               ${item.attachment.type && item.attachment.type.startsWith("image/") ? `<img src="${item.attachment.dataUrl}" alt="Attachment" />` : ""}
+             </div>`
+          : "";
+
+        return `
+          <div class="issue-item">
+            <div class="issue-top">
+              <div>
+                <strong>#${escapeHtml(item.id)}</strong> — ${escapeHtml(item.name)} (${escapeHtml(item.phone)})
+                <span class="hint"> • ${escapeHtml(item.role)} • Priority: <strong>${escapeHtml(item.severity)}</strong></span>
+              </div>
+              <span class="badge ${badgeClass}">${escapeHtml(item.status)}</span>
+            </div>
+            <div class="hint" style="margin-bottom:6px;">Date: ${escapeHtml(item.createdAt)} | Screen: ${escapeHtml(item.screen || "N/A")} | Device: ${escapeHtml(item.device || "N/A")}</div>
+            <p><strong>Categories:</strong> ${escapeHtml(item.categories.join(", "))}</p>
+            <p style="margin-top:4px;"><strong>Details:</strong> ${escapeHtml(item.description)}</p>
+            ${item.remarks ? `<p style="margin-top:4px;"><strong>Remarks:</strong> ${escapeHtml(item.remarks)}</p>` : ""}
+            ${attHtml}
+            <div class="grid-2" style="margin-top:12px;">
+              <div>
+                <label>Status बदला</label>
+                <select id="status_${item.id}">
+                  <option value="Open" ${item.status === "Open" ? "selected" : ""}>Open</option>
+                  <option value="In Progress" ${item.status === "In Progress" ? "selected" : ""}>In Progress</option>
+                  <option value="Resolved" ${item.status === "Resolved" ? "selected" : ""}>Resolved</option>
+                </select>
+              </div>
+              <div>
+                <label>Resolution / Fix Note</label>
+                <input type="text" id="res_${item.id}" value="${escapeAttr(item.resolution || "")}" placeholder="केलेला उपाय किंवा अपडेट लिहा..." />
+              </div>
+            </div>
+            <div style="margin-top:10px; display:flex; gap:8px;">
+              <button class="btn btn-sm" onclick="updateResolution('${item.id}')">Save Update</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteIssue('${item.id}')">Delete</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function updateResolution(id) {
+      const issues = getIssues();
+      const idx = issues.findIndex(i => i.id === id);
+      if (idx === -1) return;
+      issues[idx].status = document.getElementById("status_" + id).value;
+      issues[idx].resolution = document.getElementById("res_" + id).value.trim();
+      saveIssues(issues);
+      renderIssues();
+      alert("Ticket #" + id + " अपडेट झाले!");
+    }
+
+    function deleteIssue(id) {
+      if (!confirm("Ticket #" + id + " कायमचे डिलीट करायचे का?")) return;
+      const issues = getIssues().filter(i => i.id !== id);
+      saveIssues(issues);
+      renderIssues();
+    }
+
+    function exportCSV() {
+      const issues = getIssues();
+      const headers = ["Ticket ID", "Date", "Name", "Phone", "Role", "Severity", "Categories", "Screen", "Device", "Description", "Remarks", "File Name", "Status", "Resolution"];
+      const rows = issues.map(i => [
+        i.id, i.createdAt, i.name, i.phone, i.role, i.severity,
+        i.categories.join(" | "), i.screen, i.device, i.description, i.remarks,
+        i.attachment ? i.attachment.name : "", i.status, i.resolution
+      ].map(v => `"${String(v || "").replace(/"/g, '""')}"`).join(","));
+
+      const csv = [headers.join(","), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "dharashiv-connect-issues.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function escapeHtml(str) {
+      return String(str || "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+    }
+    function escapeAttr(str) {
+      return escapeHtml(str);
+    }
+  </script>
+</body>
+</html>
