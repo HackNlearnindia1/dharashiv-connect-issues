@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dharashiv Connect – Issue & Resolution Portal</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --card: #ffffff;
+      --primary: #1d4ed8;
+      --primary-dark: #1e40af;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --success: #15803d;
+      --warn: #b45309;
+      --danger: #b91c1c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 16px; line-height: 1.5; }
+    .container { max-width: 960px; margin: 0 auto; }
+    header {
+      background: linear-gradient(135deg, #0f172a, #1d4ed8);
+      color: #fff;
+      padding: 20px;
+      border-radius: 14px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    header h1 { font-size: 1.3rem; }
+    header p { font-size: 0.9rem; opacity: 0.9; }
+    .tabs { display: flex; gap: 8px; }
+    .tab-btn {
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      background: rgba(255,255,255,0.16);
+      color: #fff;
+    }
+    .tab-btn.active { background: #fff; color: var(--primary-dark); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+    }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+    .field { margin-bottom: 14px; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.92rem; }
+    .hint { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+    input[type="text"], input[type="tel"], input[type="email"], input[type="password"], select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: #fff;
+    }
+    textarea { min-height: 100px; resize: vertical; }
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px;
+    }
+    .opt-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      background: #f8fafc;
+    }
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 11px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .btn:hover { background: var(--primary-dark); }
+    .btn-secondary { background: #e2e8f0; color: var(--text); }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .btn-sm { padding: 6px 12px; font-size: 0.82rem; }
+    .ticket-box {
+      display: none;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #14532d;
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 14px;
+    }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .stat { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+    .stat .num { font-size: 1.4rem; font-weight: 700; }
+    .issue-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+    .issue-top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    .badge {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .b-open { background: #fee2e2; color: var(--danger); }
+    .b-prog { background: #fef3c7; color: var(--warn); }
+    .b-res { background: #dcfce7; color: var(--success); }
+    .attach-preview { margin-top: 8px; }
+    .attach-preview img { max-width: 240px; max-height: 180px; border-radius: 8px; border: 1px solid var(--border); display: block; margin-top: 6px; }
+    .hidden { display: none; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; margin-bottom: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Dharashiv Connect – Issue & Resolution Form</h1>
+        <p>समस्या, बग, बदलाव या डॉक्यूमेंट/स्क्रीनशॉट अपलोड करें और रेजोल्यूशन ट्रैक करें</p>
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" id="tabFormBtn" onclick="switchTab('form')">Issue Form</button>
+        <button class="tab-btn" id="tabAdminBtn" onclick="switchTab('admin')">Admin Dashboard</button>
+      </div>
+    </header>
+
+    <!-- USER ISSUE FORM -->
+    <section id="formSection" class="card">
+      <h2 style="margin-bottom: 12px; font-size: 1.15rem;">समस्या / बदलाव दर्ज करें</h2>
+      <form id="issueForm">
+        <div class="grid-2">
+          <div class="field">
+            <label for="userName">1. पूरा नाम (Full Name) *</label>
+            <input type="text" id="userName" required placeholder="अपना नाम लिखें" />
+          </div>
+          <div class="field">
+            <label for="userPhone">2. मोबाइल / WhatsApp नंबर *</label>
+            <input type="tel" id="userPhone" required pattern="[0-9+\-\s]{10,15}" placeholder="उदा. 98XXXXXXXX" />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="userRole">3. यूजर रोल *</label>
+            <select id="userRole" required>
+              <option value="">-- चुनें --</option>
+              <option value="Citizen / Customer">नागरिक / ग्राहक (Citizen)</option>
+              <option value="Business / Merchant">बिज़नेस / दुकानदार / सर्विस प्रोवाइडर (Merchant)</option>
+              <option value="Other">अन्य (Other)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="severity">4. समस्या की गंभीरता (Priority) *</label>
+            <select id="severity" required>
+              <option value="High">🔴 High – ऐप / काम रुका है</option>
+              <option value="Medium" selected>🟡 Medium – दिक्कत आ रही है</option>
+              <option value="Low">🟢 Low – सुझाव / छोटा बदलाव</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>5. समस्या या बदलाव की श्रेणी (एक से अधिक चुन सकते हैं) *</label>
+          <div class="options-grid" id="categoryGroup">
+            <label class="opt-item"><input type="checkbox" value="Login / OTP / Registration Issue" /> लॉगिन / OTP / रजिस्ट्रेशन</label>
+            <label class="opt-item"><input type="checkbox" value="Dashboard / Profile Issue" /> डैशबोर्ड / प्रोफाइल</label>
+            <label class="opt-item"><input type="checkbox" value="Business Listing / Search Issue" /> लिस्टिंग / कैटेगरी / सर्च</label>
+            <label class="opt-item"><input type="checkbox" value="Booking / Order / Payment Issue" /> बुकिंग / ऑर्डर / पेमेंट</label>
+            <label class="opt-item"><input type="checkbox" value="App Crash / Slow / UI Bug" /> क्रैश / स्लो / स्क्रीन लोड</label>
+            <label class="opt-item"><input type="checkbox" value="New Feature / Development" /> नया फीचर / डेवलपमेंट</label>
+            <label class="opt-item"><input type="checkbox" value="Existing Feature Changes" /> मौजूदा फीचर में बदलाव</label>
+            <label class="opt-item"><input type="checkbox" value="Other / Remarks" /> अन्य / रिमार्क्स</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="screenName">6. ऐप का स्क्रीन / पेज / सेक्शन</label>
+          <input type="text" id="screenName" placeholder="उदा. Login Screen, Merchant Dashboard, Category Page, Payment Screen" />
+        </div>
+
+        <div class="field">
+          <label for="description">7. समस्या या बदलाव का विस्तृत विवरण *</label>
+          <textarea id="description" required placeholder="नेमकी क्या समस्या आ रही है या आपको क्या बदलाव चाहिए, विस्तार से लिखें..."></textarea>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="docUpload">8. डॉक्यूमेंट / स्क्रीनशॉट / फाइल अपलोड करें</label>
+            <input type="file" id="docUpload" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xlsx" />
+            <div class="hint">स्क्रीनशॉट, PDF या डॉक्यूमेंट अटैच करें (बेहतर होगा कि फाइल ~2MB से छोटी हो)।</div>
+            <div id="filePreview" class="attach-preview"></div>
+          </div>
+          <div class="field">
+            <label for="deviceInfo">9. डिवाइस मॉडल और Android वर्जन</label>
+            <input type="text" id="deviceInfo" placeholder="उदा. Redmi Note 10 Pro, Android 13" />
+            <div class="field" style="margin-top: 10px; margin-bottom: 0;">
+              <label for="remarks">10. अतिरिक्त रिमार्क्स</label>
+              <input type="text" id="remarks" placeholder="कोई अतिरिक्त टिप्पणी हो तो लिखें" />
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn">Submit Issue</button>
+      </form>
+
+      <div id="ticketBox" class="ticket-box"></div>
+    </section>
+
+    <!-- ADMIN DASHBOARD -->
+    <section id="adminSection" class="card hidden">
+      <div id="loginBox">
+        <h2 style="margin-bottom: 10px; font-size: 1.15rem;">Admin Login</h2>
+        <p class="hint" style="margin-bottom: 14px;">समस्याएं देखने, डॉक्यूमेंट/स्क्रीनशॉट जांचने और रेजोल्यूशन देने के लिए लॉग इन करें।</p>
+        <form id="adminLoginForm" class="grid-2">
+          <div class="field">
+            <label for="adminEmail">Admin Email</label>
+            <input type="email" id="adminEmail" required placeholder="dhelerajendra733@gmail.com" />
+          </div>
+          <div class="field">
+            <label for="adminPass">Password</label>
+            <input type="password" id="adminPass" required placeholder="अपना पासवर्ड डालें" />
+          </div>
+          <div class="field" style="grid-column: 1 / -1;">
+            <button type="submit" class="btn">Login to Dashboard</button>
+            <span id="loginError" style="color: var(--danger); margin-left: 10px; font-size: 0.9rem;"></span>
+          </div>
+        </form>
+      </div>
+
+      <div id="dashboardPanel" class="hidden">
+        <div class="toolbar">
+          <div>
+            <h2 style="font-size: 1.15rem;">Issues & Resolution Tracker</h2>
+            <div class="hint">Logged in as dhelerajendra733@gmail.com</div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <select id="filterStatus" onchange="renderIssues()" style="width: auto;">
+              <option value="ALL">सभी Status</
