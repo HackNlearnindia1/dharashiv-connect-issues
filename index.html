@@ -245,7 +245,6 @@
         successTitle: "समस्या Google Sheet मध्ये यशस्वीपणे नोंदवली गेली!",
         ticketLine: "Ticket ID: <strong>#{id}</strong> | Status: <strong>Open</strong>",
         successNote: "तुमची तक्रार/सूचना सेव्ह झाली आहे. लवकरच कार्यवाही केली जाईल.",
-        errSubmit: "डेटा पाठवताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.",
         attImg: "जोडलेला फोटो: {name} ({size} KB)",
         attDoc: "जोडलेली फाइल: {name} ({size} KB)"
       },
@@ -298,7 +297,6 @@
         successTitle: "समस्या Google Sheet में सफलतापूर्वक दर्ज हो गई!",
         ticketLine: "Ticket ID: <strong>#{id}</strong> | Status: <strong>Open</strong>",
         successNote: "आपकी रिपोर्ट सेव कर ली गई है। जल्द ही समाधान किया जाएगा।",
-        errSubmit: "डेटा भेजने में त्रुटि आई। कृपया पुनः प्रयास करें।",
         attImg: "अटैच फोटो: {name} ({size} KB)",
         attDoc: "अटैच फाइल: {name} ({size} KB)"
       },
@@ -351,7 +349,6 @@
         successTitle: "Issue Saved to Google Sheet Successfully!",
         ticketLine: "Ticket ID: <strong>#{id}</strong> | Status: <strong>Open</strong>",
         successNote: "Your report has been saved. Our team will review it shortly.",
-        errSubmit: "Failed to submit issue. Please try again.",
         attImg: "Attached Image: {name} ({size} KB)",
         attDoc: "Attached File: {name} ({size} KB)"
       }
@@ -484,7 +481,18 @@
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
-        const data = await res.json();
+        const rawText = await res.text();
+        let data = {};
+        try {
+          data = JSON.parse(rawText);
+        } catch (parseErr) {
+          throw new Error("HTTP " + res.status + " | Non-JSON response: " + rawText.slice(0, 200));
+        }
+
+        if (!res.ok || data.status !== "ok") {
+          throw new Error("HTTP " + res.status + " | " + (data.message || rawText.slice(0, 200)));
+        }
+
         const ticketId = data.id || "DC-NEW";
 
         const box = document.getElementById("ticketBox");
@@ -500,7 +508,7 @@
         renderAttachmentPreview();
         applyLanguage(currentLang);
       } catch (err) {
-        alert(t.errSubmit);
+        alert("Error Code / Details: " + (err && err.message ? err.message : String(err)));
       } finally {
         btn.disabled = false;
         btn.textContent = t.submit;
