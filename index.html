@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="mr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,16 +16,40 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); padding: 16px; line-height: 1.5; }
-    .container { max-width: 820px; margin: 0 auto; }
+    .container { max-width: 840px; margin: 0 auto; }
     header {
       background: linear-gradient(135deg, #0f172a, #1d4ed8);
       color: #fff;
-      padding: 22px;
+      padding: 20px;
       border-radius: 14px;
       margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
     }
-    header h1 { font-size: 1.35rem; margin-bottom: 4px; }
-    header p { font-size: 0.9rem; opacity: 0.9; }
+    header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+    header p { font-size: 0.88rem; opacity: 0.92; }
+    .lang-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.14);
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+    .lang-bar select {
+      width: auto;
+      padding: 6px 10px;
+      border-radius: 7px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.88rem;
+      background: #ffffff;
+      color: #0f172a;
+      cursor: pointer;
+    }
     .card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -35,7 +59,7 @@
     }
     .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
     .field { margin-bottom: 14px; }
-    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.92rem; }
+    label.field-label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.92rem; }
     .hint { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
     input[type="text"], input[type="tel"], select, textarea {
       width: 100%;
@@ -60,6 +84,7 @@
       gap: 8px;
       font-size: 0.88rem;
       background: #f8fafc;
+      cursor: pointer;
     }
     .btn {
       background: var(--primary);
@@ -73,6 +98,7 @@
       width: 100%;
     }
     .btn:hover { background: var(--primary-dark); }
+    .btn:disabled { opacity: 0.65; cursor: not-allowed; }
     .ticket-box {
       display: none;
       background: #f0fdf4;
@@ -88,86 +114,78 @@
 <body>
   <div class="container">
     <header>
-      <h1>Dharashiv Connect – Issue & Resolution Form</h1>
-      <p>समस्या, बग, बदलाव या डॉक्यूमेंट/स्क्रीनशॉट अपलोड करें</p>
+      <div>
+        <h1 id="t_title">Dharashiv Connect – Issue & Resolution Form</h1>
+        <p id="t_subtitle">समस्या, बग, बदल किंवा डॉक्युमेंट/स्क्रीनशॉट अपलोड करा</p>
+      </div>
+      <div class="lang-bar">
+        <span id="t_lang_label" style="font-size:0.84rem; font-weight:600;">भाषा:</span>
+        <select id="langSelect" onchange="applyLanguage(this.value)">
+          <option value="mr" selected>मराठी (Marathi)</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+          <option value="en">English</option>
+        </select>
+      </div>
     </header>
 
     <section class="card">
-      <h2 style="margin-bottom: 14px; font-size: 1.15rem;">समस्या / बदलाव दर्ज करें</h2>
+      <h2 id="t_form_heading" style="margin-bottom: 14px; font-size: 1.15rem;">समस्या / बदल नोंदवा</h2>
       <form id="issueForm">
         <div class="grid-2">
           <div class="field">
-            <label for="userName">1. पूरा नाम (Full Name) *</label>
-            <input type="text" id="userName" required placeholder="अपना नाम लिखें" />
+            <label class="field-label" id="t_l_name" for="userName">1. पूर्ण नाव *</label>
+            <input type="text" id="userName" required />
           </div>
           <div class="field">
-            <label for="userPhone">2. मोबाइल / WhatsApp नंबर *</label>
-            <input type="tel" id="userPhone" required pattern="[0-9+\-\s]{10,15}" placeholder="उदा. 98XXXXXXXX" />
+            <label class="field-label" id="t_l_phone" for="userPhone">2. मोबाईल / WhatsApp नंबर *</label>
+            <input type="tel" id="userPhone" required pattern="[0-9+\-\s]{10,15}" />
           </div>
         </div>
 
         <div class="grid-2">
           <div class="field">
-            <label for="userRole">3. यूजर रोल *</label>
-            <select id="userRole" required>
-              <option value="">-- चुनें --</option>
-              <option value="Citizen / Customer">नागरिक / ग्राहक (Citizen)</option>
-              <option value="Business / Merchant">बिज़नेस / दुकानदार / सर्विस प्रोवाइडर (Merchant)</option>
-              <option value="Other">अन्य (Other)</option>
-            </select>
+            <label class="field-label" id="t_l_role" for="userRole">3. युजर प्रकार *</label>
+            <select id="userRole" required></select>
           </div>
           <div class="field">
-            <label for="severity">4. समस्या की गंभीरता (Priority) *</label>
-            <select id="severity" required>
-              <option value="High">🔴 High – ऐप / काम रुका है</option>
-              <option value="Medium" selected>🟡 Medium – दिक्कत आ रही है</option>
-              <option value="Low">🟢 Low – सुझाव / छोटा बदलाव</option>
-            </select>
+            <label class="field-label" id="t_l_sev" for="severity">4. समस्येची तीव्रता *</label>
+            <select id="severity" required></select>
           </div>
         </div>
 
         <div class="field">
-          <label>5. समस्या या बदलाव की श्रेणी (एक से अधिक चुन सकते हैं) *</label>
-          <div class="options-grid" id="categoryGroup">
-            <label class="opt-item"><input type="checkbox" value="Login / OTP / Registration Issue" /> लॉगिन / OTP / रजिस्ट्रेशन</label>
-            <label class="opt-item"><input type="checkbox" value="Dashboard / Profile Issue" /> डैशबोर्ड / प्रोफाइल</label>
-            <label class="opt-item"><input type="checkbox" value="Business Listing / Search Issue" /> लिस्टिंग / कैटेगरी / सर्च</label>
-            <label class="opt-item"><input type="checkbox" value="Booking / Order / Payment Issue" /> बुकिंग / ऑर्डर / पेमेंट</label>
-            <label class="opt-item"><input type="checkbox" value="App Crash / Slow / UI Bug" /> क्रैश / स्लो / स्क्रीन लोड</label>
-            <label class="opt-item"><input type="checkbox" value="New Feature / Development" /> नया फीचर / डेवलपमेंट</label>
-            <label class="opt-item"><input type="checkbox" value="Existing Feature Changes" /> मौजूदा फीचर में बदलाव</label>
-            <label class="opt-item"><input type="checkbox" value="Other / Remarks" /> अन्य / रिमार्क्स</label>
-          </div>
+          <label class="field-label" id="t_l_cat">5. समस्या किंवा बदलाचा प्रकार (एक किंवा अधिक निवडा) *</label>
+          <div class="options-grid" id="categoryGroup"></div>
         </div>
 
         <div class="field">
-          <label for="screenName">6. ऐप का स्क्रीन / पेज / सेक्शन</label>
-          <input type="text" id="screenName" placeholder="उदा. Login Screen, Merchant Dashboard, Category Page, Payment Screen" />
+          <label class="field-label" id="t_l_screen" for="screenName">6. अॅपमधील स्क्रीन / पेज / विभाग</label>
+          <input type="text" id="screenName" />
         </div>
 
         <div class="field">
-          <label for="description">7. समस्या या बदलाव का विस्तृत विवरण *</label>
-          <textarea id="description" required placeholder="नेमकी क्या समस्या आ रही है या आपको क्या बदलाव चाहिए, विस्तार से लिखें..."></textarea>
+          <label class="field-label" id="t_l_desc" for="description">7. समस्या किंवा बदलाचा सविस्तर तपशील *</label>
+          <textarea id="description" required></textarea>
         </div>
 
         <div class="grid-2">
           <div class="field">
-            <label for="docUpload">8. डॉक्यूमेंट / स्क्रीनशॉट / फाइल अपलोड करें</label>
+            <label class="field-label" id="t_l_doc" for="docUpload">8. डॉक्युमेंट / स्क्रीनशॉट / फाइल अपलोड करा</label>
             <input type="file" id="docUpload" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xlsx" />
-            <div class="hint">स्क्रीनशॉट, PDF या डॉक्यूमेंट अटैच करें (~2MB से छोटी फाइल बेहतर रहेगी)।</div>
+            <div class="hint" id="t_h_doc">स्क्रीनशॉट, PDF किंवा डॉक्युमेंट जोडा (~500KB पेक्षा लहान फाइल शीटसाठी उत्तम).</div>
             <div id="filePreview" class="attach-preview"></div>
           </div>
           <div class="field">
-            <label for="deviceInfo">9. डिवाइस मॉडल और Android वर्जन</label>
-            <input type="text" id="deviceInfo" placeholder="उदा. Redmi Note 10 Pro, Android 13" />
+            <label class="field-label" id="t_l_dev" for="deviceInfo">9. डिव्हाइस मॉडेल आणि Android व्हर्जन</label>
+            <input type="text" id="deviceInfo" />
             <div class="field" style="margin-top: 10px; margin-bottom: 0;">
-              <label for="remarks">10. अतिरिक्त रिमार्क्स</label>
-              <input type="text" id="remarks" placeholder="कोई अतिरिक्त टिप्पणी हो तो लिखें" />
+              <label class="field-label" id="t_l_rem" for="remarks">10. अतिरिक्त रिमार्क्स</label>
+              <input type="text" id="remarks" />
             </div>
           </div>
         </div>
 
-        <button type="submit" class="btn">Submit Issue</button>
+        <button type="submit" class="btn" id="t_btn_submit">समस्या नोंदवा (Submit)</button>
       </form>
 
       <div id="ticketBox" class="ticket-box"></div>
@@ -175,28 +193,250 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "dc_issues_v1";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznL9ngfRz2uzll2ePk-iDcf__5ATB0b9J12Nj5RNwPWWzizz8swbJhfDKvdwR_kcHZ/exec";
+
+    const I18N = {
+      mr: {
+        title: "Dharashiv Connect – Issue & Resolution Form",
+        subtitle: "समस्या, बग, बदल किंवा डॉक्युमेंट/स्क्रीनशॉट अपलोड करा",
+        langLabel: "भाषा:",
+        heading: "समस्या / बदल नोंदवा",
+        lName: "1. पूर्ण नाव *",
+        pName: "तुमचे पूर्ण नाव लिहा",
+        lPhone: "2. मोबाईल / WhatsApp नंबर *",
+        pPhone: "उदा. 98XXXXXXXX",
+        lRole: "3. युजर प्रकार *",
+        roles: [
+          { val: "", label: "-- निवडा --" },
+          { val: "Citizen / Customer", label: "नागरिक / ग्राहक (Citizen)" },
+          { val: "Business / Merchant", label: "व्यवसाय / दुकानदार / सेवा प्रदाता (Merchant)" },
+          { val: "Other", label: "इतर (Other)" }
+        ],
+        lSev: "4. समस्येची तीव्रता *",
+        sevs: [
+          { val: "High", label: "🔴 High – अॅप / काम पूर्ण थांबले आहे" },
+          { val: "Medium", label: "🟡 Medium – अडचण येत आहे" },
+          { val: "Low", label: "🟢 Low – सूचना / लहान बदल" }
+        ],
+        lCat: "5. समस्या किंवा बदलाचा प्रकार (एक किंवा अधिक निवडा) *",
+        cats: [
+          { val: "Login / OTP / Registration Issue", label: "लॉगिन / OTP / नोंदणी समस्या" },
+          { val: "Dashboard / Profile Issue", label: "डॅशबोर्ड / प्रोफाइल समस्या" },
+          { val: "Business Listing / Search Issue", label: "लिस्टिंग / कॅटेगरी / सर्च समस्या" },
+          { val: "Booking / Order / Payment Issue", label: "बुकिंग / ऑर्डर / पेमेंट समस्या" },
+          { val: "App Crash / Slow / UI Bug", label: "अॅप क्रॅश / स्लो / स्क्रीन लोडिंग" },
+          { val: "New Feature / Development", label: "नवीन फीचर / डेव्हलपमेंट" },
+          { val: "Existing Feature Changes", label: "सध्याच्या फीचरमध्ये बदल" },
+          { val: "Other / Remarks", label: "इतर / रिमार्क्स" }
+        ],
+        lScreen: "6. अॅपमधील स्क्रीन / पेज / विभाग",
+        pScreen: "उदा. Login Screen, Merchant Dashboard, Category Page",
+        lDesc: "7. समस्या किंवा बदलाचा सविस्तर तपशील *",
+        pDesc: "नेमकी कोणती समस्या येत आहे किंवा कोणता बदल हवा आहे, ते सविस्तर लिहा...",
+        lDoc: "8. डॉक्युमेंट / स्क्रीनशॉट / फाइल अपलोड करा",
+        hDoc: "स्क्रीनशॉट, PDF किंवा डॉक्युमेंट जोडा (~500KB पेक्षा लहान फाइल शीटसाठी उत्तम).",
+        lDev: "9. डिव्हाइस मॉडेल आणि Android व्हर्जन",
+        pDev: "उदा. Redmi Note 10 Pro, Android 13",
+        lRem: "10. अतिरिक्त रिमार्क्स",
+        pRem: "कोणतीही अतिरिक्त माहिती असल्यास लिहा",
+        submit: "समस्या नोंदवा (Submit)",
+        submitting: "सेव्ह होत आहे...",
+        alertCat: "कृपया किमान एक प्रकार (Category) निवडा.",
+        successTitle: "समस्या Google Sheet मध्ये यशस्वीपणे नोंदवली गेली!",
+        ticketLine: "Ticket ID: <strong>#{id}</strong> | Status: <strong>Open</strong>",
+        successNote: "तुमची तक्रार/सूचना सेव्ह झाली आहे. लवकरच कार्यवाही केली जाईल.",
+        errSubmit: "डेटा पाठवताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.",
+        attImg: "जोडलेला फोटो: {name} ({size} KB)",
+        attDoc: "जोडलेली फाइल: {name} ({size} KB)"
+      },
+      hi: {
+        title: "Dharashiv Connect – Issue & Resolution Form",
+        subtitle: "समस्या, बग, बदलाव या डॉक्यूमेंट/स्क्रीनशॉट अपलोड करें",
+        langLabel: "भाषा:",
+        heading: "समस्या / बदलाव दर्ज करें",
+        lName: "1. पूरा नाम *",
+        pName: "अपना पूरा नाम लिखें",
+        lPhone: "2. मोबाइल / WhatsApp नंबर *",
+        pPhone: "उदा. 98XXXXXXXX",
+        lRole: "3. यूजर रोल *",
+        roles: [
+          { val: "", label: "-- चुनें --" },
+          { val: "Citizen / Customer", label: "नागरिक / ग्राहक (Citizen)" },
+          { val: "Business / Merchant", label: "बिज़नेस / दुकानदार / सर्विस प्रोवाइडर (Merchant)" },
+          { val: "Other", label: "अन्य (Other)" }
+        ],
+        lSev: "4. समस्या की गंभीरता *",
+        sevs: [
+          { val: "High", label: "🔴 High – ऐप / काम रुका है" },
+          { val: "Medium", label: "🟡 Medium – दिक्कत आ रही है" },
+          { val: "Low", label: "🟢 Low – सुझाव / छोटा बदलाव" }
+        ],
+        lCat: "5. समस्या या बदलाव की श्रेणी (एक से अधिक चुन सकते हैं) *",
+        cats: [
+          { val: "Login / OTP / Registration Issue", label: "लॉगिन / OTP / रजिस्ट्रेशन" },
+          { val: "Dashboard / Profile Issue", label: "डैशबोर्ड / प्रोफाइल" },
+          { val: "Business Listing / Search Issue", label: "लिस्टिंग / कैटेगरी / सर्च" },
+          { val: "Booking / Order / Payment Issue", label: "बुकिंग / ऑर्डर / पेमेंट" },
+          { val: "App Crash / Slow / UI Bug", label: "क्रैश / स्लो / स्क्रीन लोड" },
+          { val: "New Feature / Development", label: "नया फीचर / डेवलपमेंट" },
+          { val: "Existing Feature Changes", label: "मौजूदा फीचर में बदलाव" },
+          { val: "Other / Remarks", label: "अन्य / रिमार्क्स" }
+        ],
+        lScreen: "6. ऐप का स्क्रीन / पेज / सेक्शन",
+        pScreen: "उदा. Login Screen, Merchant Dashboard, Category Page",
+        lDesc: "7. समस्या या बदलाव का विस्तृत विवरण *",
+        pDesc: "क्या समस्या आ रही है या आपको क्या बदलाव चाहिए, विस्तार से लिखें...",
+        lDoc: "8. डॉक्यूमेंट / स्क्रीनशॉट / फाइल अपलोड करें",
+        hDoc: "स्क्रीनशॉट, PDF या डॉक्यूमेंट अटैच करें (~500KB से छोटी फाइल शीट के लिए बेहतर).",
+        lDev: "9. डिवाइस मॉडल और Android वर्जन",
+        pDev: "उदा. Redmi Note 10 Pro, Android 13",
+        lRem: "10. अतिरिक्त रिमार्क्स",
+        pRem: "कोई अतिरिक्त टिप्पणी हो तो लिखें",
+        submit: "समस्या दर्ज करें (Submit)",
+        submitting: "सेव हो रहा है...",
+        alertCat: "कृपया कम से कम एक श्रेणी चुनें।",
+        successTitle: "समस्या Google Sheet में सफलतापूर्वक दर्ज हो गई!",
+        ticketLine: "Ticket ID: <strong>#{id}</strong> | Status: <strong>Open</strong>",
+        successNote: "आपकी रिपोर्ट सेव कर ली गई है। जल्द ही समाधान किया जाएगा।",
+        errSubmit: "डेटा भेजने में त्रुटि आई। कृपया पुनः प्रयास करें।",
+        attImg: "अटैच फोटो: {name} ({size} KB)",
+        attDoc: "अटैच फाइल: {name} ({size} KB)"
+      },
+      en: {
+        title: "Dharashiv Connect – Issue & Resolution Form",
+        subtitle: "Report an issue, bug, requested change, or upload a document/screenshot",
+        langLabel: "Language:",
+        heading: "Report an Issue or Change Request",
+        lName: "1. Full Name *",
+        pName: "Enter your full name",
+        lPhone: "2. Mobile / WhatsApp Number *",
+        pPhone: "e.g. 98XXXXXXXX",
+        lRole: "3. User Role *",
+        roles: [
+          { val: "", label: "-- Select --" },
+          { val: "Citizen / Customer", label: "Citizen / Customer" },
+          { val: "Business / Merchant", label: "Business / Merchant / Service Provider" },
+          { val: "Other", label: "Other" }
+        ],
+        lSev: "4. Priority / Severity *",
+        sevs: [
+          { val: "High", label: "🔴 High – App / workflow blocked" },
+          { val: "Medium", label: "🟡 Medium – Experiencing trouble" },
+          { val: "Low", label: "🟢 Low – Suggestion / minor change" }
+        ],
+        lCat: "5. Category (Select one or more) *",
+        cats: [
+          { val: "Login / OTP / Registration Issue", label: "Login / OTP / Registration" },
+          { val: "Dashboard / Profile Issue", label: "Dashboard / Profile" },
+          { val: "Business Listing / Search Issue", label: "Listing / Category / Search" },
+          { val: "Booking / Order / Payment Issue", label: "Booking / Order / Payment" },
+          { val: "App Crash / Slow / UI Bug", label: "App Crash / Slow / UI Loading" },
+          { val: "New Feature / Development", label: "New Feature / Development" },
+          { val: "Existing Feature Changes", label: "Changes in Existing Feature" },
+          { val: "Other / Remarks", label: "Other / Remarks" }
+        ],
+        lScreen: "6. App Screen / Page / Section",
+        pScreen: "e.g. Login Screen, Merchant Dashboard, Category Page",
+        lDesc: "7. Detailed Description of Issue or Change *",
+        pDesc: "Describe the issue or requested change in detail...",
+        lDoc: "8. Upload Document / Screenshot / File",
+        hDoc: "Attach a screenshot, PDF, or document (~500KB or smaller recommended for Sheet).",
+        lDev: "9. Device Model & Android Version",
+        pDev: "e.g. Redmi Note 10 Pro, Android 13",
+        lRem: "10. Additional Remarks",
+        pRem: "Any extra notes or remarks",
+        submit: "Submit Issue",
+        submitting: "Saving...",
+        alertCat: "Please select at least one category.",
+        successTitle: "Issue Saved to Google Sheet Successfully!",
+        ticketLine: "Ticket ID: <strong>#{id}</strong> | Status: <strong>Open</strong>",
+        successNote: "Your report has been saved. Our team will review it shortly.",
+        errSubmit: "Failed to submit issue. Please try again.",
+        attImg: "Attached Image: {name} ({size} KB)",
+        attDoc: "Attached File: {name} ({size} KB)"
+      }
+    };
+
+    let currentLang = "mr";
     let currentAttachment = null;
 
-    function getIssues() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      } catch {
-        return [];
-      }
+    function applyLanguage(lang) {
+      currentLang = I18N[lang] ? lang : "mr";
+      document.documentElement.lang = currentLang;
+      const t = I18N[currentLang];
+
+      document.getElementById("t_title").textContent = t.title;
+      document.getElementById("t_subtitle").textContent = t.subtitle;
+      document.getElementById("t_lang_label").textContent = t.langLabel;
+      document.getElementById("t_form_heading").textContent = t.heading;
+
+      document.getElementById("t_l_name").textContent = t.lName;
+      document.getElementById("userName").placeholder = t.pName;
+
+      document.getElementById("t_l_phone").textContent = t.lPhone;
+      document.getElementById("userPhone").placeholder = t.pPhone;
+
+      const roleSel = document.getElementById("userRole");
+      const prevRole = roleSel.value;
+      roleSel.innerHTML = t.roles.map(r => `<option value="${escapeAttr(r.val)}">${escapeHtml(r.label)}</option>`).join("");
+      roleSel.value = prevRole;
+      document.getElementById("t_l_role").textContent = t.lRole;
+
+      const sevSel = document.getElementById("severity");
+      const prevSev = sevSel.value || "Medium";
+      sevSel.innerHTML = t.sevs.map(s => `<option value="${escapeAttr(s.val)}">${escapeHtml(s.label)}</option>`).join("");
+      sevSel.value = prevSev;
+      document.getElementById("t_l_sev").textContent = t.lSev;
+
+      const checkedVals = Array.from(document.querySelectorAll("#categoryGroup input:checked")).map(el => el.value);
+      document.getElementById("t_l_cat").textContent = t.lCat;
+      document.getElementById("categoryGroup").innerHTML = t.cats.map(c => `
+        <label class="opt-item">
+          <input type="checkbox" value="${escapeAttr(c.val)}" ${checkedVals.includes(c.val) ? "checked" : ""} />
+          <span>${escapeHtml(c.label)}</span>
+        </label>
+      `).join("");
+
+      document.getElementById("t_l_screen").textContent = t.lScreen;
+      document.getElementById("screenName").placeholder = t.pScreen;
+
+      document.getElementById("t_l_desc").textContent = t.lDesc;
+      document.getElementById("description").placeholder = t.pDesc;
+
+      document.getElementById("t_l_doc").textContent = t.lDoc;
+      document.getElementById("t_h_doc").textContent = t.hDoc;
+
+      document.getElementById("t_l_dev").textContent = t.lDev;
+      document.getElementById("deviceInfo").placeholder = t.pDev;
+
+      document.getElementById("t_l_rem").textContent = t.lRem;
+      document.getElementById("remarks").placeholder = t.pRem;
+
+      document.getElementById("t_btn_submit").textContent = t.submit;
+      renderAttachmentPreview();
     }
 
-    function saveIssues(list) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    function renderAttachmentPreview() {
+      const preview = document.getElementById("filePreview");
+      preview.innerHTML = "";
+      if (!currentAttachment) return;
+      const t = I18N[currentLang];
+      if (currentAttachment.type && currentAttachment.type.startsWith("image/")) {
+        const msg = t.attImg.replace("{name}", escapeHtml(currentAttachment.name)).replace("{size}", currentAttachment.sizeKB);
+        preview.innerHTML = `<span class="hint">${msg}</span><img src="${currentAttachment.dataUrl}" alt="Preview" />`;
+      } else {
+        const msg = t.attDoc.replace("{name}", escapeHtml(currentAttachment.name)).replace("{size}", currentAttachment.sizeKB);
+        preview.innerHTML = `<span class="hint">${msg}</span>`;
+      }
     }
 
     document.getElementById("docUpload").addEventListener("change", function (e) {
       const file = e.target.files[0];
-      const preview = document.getElementById("filePreview");
-      preview.innerHTML = "";
       currentAttachment = null;
-      if (!file) return;
-
+      if (!file) {
+        renderAttachmentPreview();
+        return;
+      }
       const reader = new FileReader();
       reader.onload = function (ev) {
         currentAttachment = {
@@ -205,28 +445,27 @@
           sizeKB: Math.round(file.size / 1024),
           dataUrl: ev.target.result
         };
-        if (file.type.startsWith("image/")) {
-          preview.innerHTML = `<span class="hint">Attached: ${escapeHtml(file.name)} (${currentAttachment.sizeKB} KB)</span><img src="${ev.target.result}" alt="Preview" />`;
-        } else {
-          preview.innerHTML = `<span class="hint">Attached Document: ${escapeHtml(file.name)} (${currentAttachment.sizeKB} KB)</span>`;
-        }
+        renderAttachmentPreview();
       };
       reader.readAsDataURL(file);
     });
 
-    document.getElementById("issueForm").addEventListener("submit", function (e) {
+    document.getElementById("issueForm").addEventListener("submit", async function (e) {
       e.preventDefault();
+      const t = I18N[currentLang];
       const selectedCats = Array.from(document.querySelectorAll("#categoryGroup input:checked")).map(el => el.value);
       if (selectedCats.length === 0) {
-        alert("कृपया कम से कम एक श्रेणी (Category) चुनें।");
+        alert(t.alertCat);
         return;
       }
 
-      const issues = getIssues();
-      const nextNum = 101 + issues.length;
-      const ticket = {
-        id: "DC-" + nextNum,
-        createdAt: new Date().toLocaleString("en-IN"),
+      const btn = document.getElementById("t_btn_submit");
+      btn.disabled = true;
+      btn.textContent = t.submitting;
+
+      const payload = {
+        action: "create",
+        language: currentLang,
         name: document.getElementById("userName").value.trim(),
         phone: document.getElementById("userPhone").value.trim(),
         role: document.getElementById("userRole").value,
@@ -236,30 +475,46 @@
         description: document.getElementById("description").value.trim(),
         device: document.getElementById("deviceInfo").value.trim(),
         remarks: document.getElementById("remarks").value.trim(),
-        attachment: currentAttachment,
-        status: "Open",
-        resolution: ""
+        attachment: currentAttachment
       };
 
-      issues.unshift(ticket);
-      saveIssues(issues);
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        const ticketId = data.id || "DC-NEW";
 
-      const box = document.getElementById("ticketBox");
-      box.style.display = "block";
-      box.innerHTML = `
-        <strong>समस्या सफलतापूर्वक दर्ज हो गई!</strong><br/>
-        Ticket ID: <strong>#${escapeHtml(ticket.id)}</strong> | Status: <strong>Open</strong><br/>
-        आपकी रिपोर्ट और अटैचमेंट सेव कर ली गई है। जल्द ही समाधान किया जाएगा।
-      `;
+        const box = document.getElementById("ticketBox");
+        box.style.display = "block";
+        box.innerHTML = `
+          <strong>${escapeHtml(t.successTitle)}</strong><br/>
+          ${t.ticketLine.replace("{id}", escapeHtml(ticketId))}<br/>
+          ${escapeHtml(t.successNote)}
+        `;
 
-      e.target.reset();
-      document.getElementById("filePreview").innerHTML = "";
-      currentAttachment = null;
+        e.target.reset();
+        currentAttachment = null;
+        renderAttachmentPreview();
+        applyLanguage(currentLang);
+      } catch (err) {
+        alert(t.errSubmit);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = t.submit;
+      }
     });
 
     function escapeHtml(str) {
       return String(str || "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
     }
+    function escapeAttr(str) {
+      return escapeHtml(str);
+    }
+
+    applyLanguage("mr");
   </script>
 </body>
 </html>
