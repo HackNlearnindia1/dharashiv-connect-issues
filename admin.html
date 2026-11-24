@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="mr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -95,15 +95,15 @@
     <header>
       <div>
         <h1>Dharashiv Connect – Admin Tracking Dashboard</h1>
-        <p>समस्या, स्क्रीनशॉट/डॉक्यूमेंट आणि रेझोल्यूशन ट्रॅकिंग पॅनेल</p>
+        <p>Google Sheet Live Sync • समस्या, अटैचमेंट आणि रेझोल्यूशन ट्रॅकिंग</p>
       </div>
-      <div id="headerActions" class="hidden" style="display:none; gap:8px;">
+      <div id="headerActions" class="hidden" style="display:none; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-sm btn-secondary" onclick="loadIssuesFromSheet()">Refresh Sheet</button>
         <button class="btn btn-sm btn-secondary" onclick="exportCSV()">Export CSV</button>
         <button class="btn btn-sm btn-danger" onclick="logoutAdmin()">Logout</button>
       </div>
     </header>
 
-    <!-- LOGIN SECTION -->
     <section id="loginBox" class="card" style="max-width: 480px; margin: 24px auto;">
       <h2 style="margin-bottom: 8px; font-size: 1.15rem;">Admin Login</h2>
       <p class="hint" style="margin-bottom: 14px;">ट्रॅकिंग डॅशबोर्ड उघडण्यासाठी लॉगिन करा.</p>
@@ -121,7 +121,6 @@
       </form>
     </section>
 
-    <!-- DASHBOARD SECTION -->
     <section id="dashboardPanel" class="card hidden">
       <div class="stats" id="statsRow"></div>
 
@@ -149,21 +148,11 @@
   </div>
 
   <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznL9ngfRz2uzll2ePk-iDcf__5ATB0b9J12Nj5RNwPWWzizz8swbJhfDKvdwR_kcHZ/exec";
     const ADMIN_EMAIL = "dhelerajendra733@gmail.com";
     const ADMIN_PASS = "Raj@898989";
-    const STORAGE_KEY = "dc_issues_v1";
 
-    function getIssues() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      } catch {
-        return [];
-      }
-    }
-
-    function saveIssues(list) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    }
+    let allIssues = [];
 
     window.addEventListener("DOMContentLoaded", function () {
       if (sessionStorage.getItem("dc_admin_auth") === "1") {
@@ -192,7 +181,7 @@
       const actions = document.getElementById("headerActions");
       actions.classList.remove("hidden");
       actions.style.display = "flex";
-      renderIssues();
+      loadIssuesFromSheet();
     }
 
     function logoutAdmin() {
@@ -204,27 +193,39 @@
       document.getElementById("loginBox").classList.remove("hidden");
     }
 
+    async function loadIssuesFromSheet() {
+      document.getElementById("issuesList").innerHTML = `<p class="hint" style="padding:12px 0;">Google Sheet मधून डेटा लोड होत आहे...</p>`;
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        allIssues = Array.isArray(data.issues) ? data.issues : [];
+        renderIssues();
+      } catch (err) {
+        document.getElementById("issuesList").innerHTML = `<p style="color:var(--danger); padding:12px 0;">Google Sheet डेटा वाचताना त्रुटी आली. Web App Access "Anyone" सेट असल्याची खात्री करा.</p>`;
+      }
+    }
+
     function renderIssues() {
-      const issues = getIssues();
       const statusFilter = document.getElementById("filterStatus").value;
       const prioFilter = document.getElementById("filterPriority").value;
       const q = document.getElementById("searchBox").value.trim().toLowerCase();
 
-      const openCount = issues.filter(i => i.status === "Open").length;
-      const progCount = issues.filter(i => i.status === "In Progress").length;
-      const resCount = issues.filter(i => i.status === "Resolved").length;
+      const openCount = allIssues.filter(i => i.status === "Open").length;
+      const progCount = allIssues.filter(i => i.status === "In Progress").length;
+      const resCount = allIssues.filter(i => i.status === "Resolved").length;
 
       document.getElementById("statsRow").innerHTML = `
-        <div class="stat"><div class="hint">एकूण Issues</div><div class="num">${issues.length}</div></div>
+        <div class="stat"><div class="hint">एकूण Issues</div><div class="num">${allIssues.length}</div></div>
         <div class="stat"><div class="hint">Open</div><div class="num" style="color:var(--danger)">${openCount}</div></div>
         <div class="stat"><div class="hint">In Progress</div><div class="num" style="color:var(--warn)">${progCount}</div></div>
         <div class="stat"><div class="hint">Resolved</div><div class="num" style="color:var(--success)">${resCount}</div></div>
       `;
 
-      const filtered = issues.filter(item => {
+      const filtered = allIssues.filter(item => {
         const matchStatus = statusFilter === "ALL" || item.status === statusFilter;
         const matchPrio = prioFilter === "ALL" || item.severity === prioFilter;
-        const text = `${item.id} ${item.name} ${item.phone} ${item.description} ${item.screen} ${item.categories.join(" ")}`.toLowerCase();
+        const cats = Array.isArray(item.categories) ? item.categories.join(" ") : String(item.categories || "");
+        const text = `${item.id} ${item.name} ${item.phone} ${item.description} ${item.screen} ${cats}`.toLowerCase();
         const matchQuery = !q || text.includes(q);
         return matchStatus && matchPrio && matchQuery;
       });
@@ -237,11 +238,16 @@
 
       listEl.innerHTML = filtered.map(item => {
         const badgeClass = item.status === "Resolved" ? "b-res" : item.status === "In Progress" ? "b-prog" : "b-open";
-        const attHtml = item.attachment
+        const catText = Array.isArray(item.categories) ? item.categories.join(", ") : String(item.categories || "");
+        const att = item.attachment && item.attachment.name;
+        const dataUrl = item.attachment && item.attachment.dataUrl;
+        const isImg = dataUrl && dataUrl.startsWith("data:image/");
+
+        const attHtml = att
           ? `<div class="attach-preview">
-               <strong>Attachment:</strong> ${escapeHtml(item.attachment.name)} (${item.attachment.sizeKB} KB) —
-               <a href="${item.attachment.dataUrl}" download="${escapeHtml(item.attachment.name)}">Download File</a>
-               ${item.attachment.type && item.attachment.type.startsWith("image/") ? `<img src="${item.attachment.dataUrl}" alt="Attachment" />` : ""}
+               <strong>Attachment:</strong> ${escapeHtml(att)}
+               ${dataUrl ? ` — <a href="${escapeAttr(dataUrl)}" download="${escapeHtml(att)}">Download File</a>` : ""}
+               ${isImg ? `<img src="${escapeAttr(dataUrl)}" alt="Attachment" />` : ""}
              </div>`
           : "";
 
@@ -255,14 +261,14 @@
               <span class="badge ${badgeClass}">${escapeHtml(item.status)}</span>
             </div>
             <div class="hint" style="margin-bottom:6px;">Date: ${escapeHtml(item.createdAt)} | Screen: ${escapeHtml(item.screen || "N/A")} | Device: ${escapeHtml(item.device || "N/A")}</div>
-            <p><strong>Categories:</strong> ${escapeHtml(item.categories.join(", "))}</p>
+            <p><strong>Categories:</strong> ${escapeHtml(catText)}</p>
             <p style="margin-top:4px;"><strong>Details:</strong> ${escapeHtml(item.description)}</p>
             ${item.remarks ? `<p style="margin-top:4px;"><strong>Remarks:</strong> ${escapeHtml(item.remarks)}</p>` : ""}
             ${attHtml}
             <div class="grid-2" style="margin-top:12px;">
               <div>
                 <label>Status बदला</label>
-                <select id="status_${item.id}">
+                <select id="status_${escapeAttr(item.id)}">
                   <option value="Open" ${item.status === "Open" ? "selected" : ""}>Open</option>
                   <option value="In Progress" ${item.status === "In Progress" ? "selected" : ""}>In Progress</option>
                   <option value="Resolved" ${item.status === "Resolved" ? "selected" : ""}>Resolved</option>
@@ -270,42 +276,54 @@
               </div>
               <div>
                 <label>Resolution / Fix Note</label>
-                <input type="text" id="res_${item.id}" value="${escapeAttr(item.resolution || "")}" placeholder="केलेला उपाय किंवा अपडेट लिहा..." />
+                <input type="text" id="res_${escapeAttr(item.id)}" value="${escapeAttr(item.resolution || "")}" placeholder="केलेला उपाय किंवा अपडेट लिहा..." />
               </div>
             </div>
             <div style="margin-top:10px; display:flex; gap:8px;">
-              <button class="btn btn-sm" onclick="updateResolution('${item.id}')">Save Update</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteIssue('${item.id}')">Delete</button>
+              <button class="btn btn-sm" onclick="updateResolution('${escapeJs(item.id)}')">Save to Sheet</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteIssue('${escapeJs(item.id)}')">Delete</button>
             </div>
           </div>
         `;
       }).join("");
     }
 
-    function updateResolution(id) {
-      const issues = getIssues();
-      const idx = issues.findIndex(i => i.id === id);
-      if (idx === -1) return;
-      issues[idx].status = document.getElementById("status_" + id).value;
-      issues[idx].resolution = document.getElementById("res_" + id).value.trim();
-      saveIssues(issues);
-      renderIssues();
-      alert("Ticket #" + id + " अपडेट झाले!");
+    async function updateResolution(id) {
+      const status = document.getElementById("status_" + id).value;
+      const resolution = document.getElementById("res_" + id).value.trim();
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "update", id, status, resolution })
+        });
+        alert("Ticket #" + id + " Google Sheet मध्ये अपडेट झाले!");
+        await loadIssuesFromSheet();
+      } catch (err) {
+        alert("अपडेट सेव्ह करताना त्रुटी आली.");
+      }
     }
 
-    function deleteIssue(id) {
+    async function deleteIssue(id) {
       if (!confirm("Ticket #" + id + " कायमचे डिलीट करायचे का?")) return;
-      const issues = getIssues().filter(i => i.id !== id);
-      saveIssues(issues);
-      renderIssues();
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "delete", id })
+        });
+        await loadIssuesFromSheet();
+      } catch (err) {
+        alert("डिलीट करताना त्रुटी आली.");
+      }
     }
 
     function exportCSV() {
-      const issues = getIssues();
       const headers = ["Ticket ID", "Date", "Name", "Phone", "Role", "Severity", "Categories", "Screen", "Device", "Description", "Remarks", "File Name", "Status", "Resolution"];
-      const rows = issues.map(i => [
+      const rows = allIssues.map(i => [
         i.id, i.createdAt, i.name, i.phone, i.role, i.severity,
-        i.categories.join(" | "), i.screen, i.device, i.description, i.remarks,
+        Array.isArray(i.categories) ? i.categories.join(" | ") : (i.categories || ""),
+        i.screen, i.device, i.description, i.remarks,
         i.attachment ? i.attachment.name : "", i.status, i.resolution
       ].map(v => `"${String(v || "").replace(/"/g, '""')}"`).join(","));
 
@@ -324,6 +342,9 @@
     }
     function escapeAttr(str) {
       return escapeHtml(str);
+    }
+    function escapeJs(str) {
+      return String(str || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
     }
   </script>
 </body>
